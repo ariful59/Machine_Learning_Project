@@ -1,92 +1,163 @@
 import pandas as pd
 import warnings
-
 import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sns
-import tensorflow as tf
+import numpy as np
+from seaborn import heatmap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+import seaborn as sns
 
 warnings.filterwarnings('ignore')
 
 # Reading CSV
+hr_data = pd.read_csv('HR_Analytics.csv')
+print(hr_data.head())
 
-hr_data = pd.read_csv('HR_Dataset.csv')
+# Data Exploration
+# Handle missing values
+# Remove duplicates
+# Check for outliers
+# Correct data types
+# Fix inconsistent data
+# Address class imbalance (if relevant)
+# Feature engineering
 
-# Exploratory Data Analysis
-
-hr_data.head()
-
-cols = hr_data.columns.tolist()
-new_position = 10
-
-cols.insert(new_position, cols.pop(cols.index('left')))
-hr_data = hr_data[cols]
-
-
-hr_data.head()
+# Data Info
 print(hr_data.info())
-print(hr_data.describe())
 
+# Shape of the hr data
+print("Shape command")
+print(hr_data.shape)
+# Part -1 Data Cleaning
 
-hr_data.rename(columns={'Departments ':'departments'},inplace=True)
-hr_data.columns = hr_data.columns.str.strip()
+hr_data.rename(
+    columns={
+        "left": "retention",
+        "Work_accident": "work_accident",
+        "Department": "department",
+        "time_spend_company": "tenure",
+        "average_montly_hours": "average_monthly_hours"
+    }, inplace=True
+)
 
-# print(hr_data.groupby('Department').mean())
-# print(hr_data.groupby('salary').mean())
-# print(hr_data.groupby('left').mean())
+# Qualitative, quantitative division
+qualitative = []
+quantitative = []
 
-# Cleaning of data
+for column in hr_data.columns:
+    if pd.api.types.is_numeric_dtype(hr_data[column]):
+        quantitative.append(column)
+    else:
+        qualitative.append(column)
 
-hr_data.isnull().sum()
+# Handle missing values
+print("Number of Duplicate data")
+print(hr_data.duplicated().sum())
 
-print("Number of duplicates : ", len(hr_data[hr_data.duplicated()]))
+# Remove duplicates
+if hr_data.duplicated().any():
+    print('Duplicate data found')
+    hr_data.drop_duplicates(inplace=True)
+else:
+    print('No duplicate data found')
 
-hr_data = hr_data.drop_duplicates()
-print("Number of duplicates : ", len(hr_data[hr_data.duplicated()]))
+print(hr_data.duplicated().sum())
 
+# Check for outliers
+remove_binary_valued_columns = [t for t in hr_data.columns if
+                                t not in ['retention', 'promotion_last_5years', 'work_accident']]
+print(remove_binary_valued_columns)
 
+plt.figure(figsize=(10, 6))
+plt.suptitle("Boxplot")
+for i, feature in enumerate(remove_binary_valued_columns):
+    ax = plt.subplot(3, 3, i + 1)
+    sns.boxplot(hr_data[feature], ax=ax)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    plt.tight_layout()
+plt.show()
 
+# Some outliers in the tenure
+for col in quantitative:
+    print(col)
+    Q1 = hr_data[col].quantile(0.25)
+    Q3 = hr_data[col].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # hr_data[col] = np.clip(hr_data[col], lower_bound, upper_bound)
+    print(hr_data.shape)
+
+# Correct data types
+hr_data['salary'] = hr_data['salary'].astype('category')
+# Fix inconsistent data
+# No inconsistent data
+
+# Address class imbalance (if relevant)
+# No address class imbalance
+# Feature engineering
+# No need to create new feature from existing features.
+
+# Data Visualization
+# Histograms, Box plots, Scatter plots, Bar plots, Line plots, Pair plots
+
+# Encoding Data
+encoder = LabelEncoder()
+
+hr_data["department"] = encoder.fit_transform(hr_data["department"])
+hr_data["salary"] = encoder.fit_transform(hr_data["salary"])
+
+print("Department only unique after encoding")
+print(hr_data["department"].unique())
+print(hr_data.dtypes)
+
+# Correlation heatmaps
+plt.figure(figsize=(20, 12))
+heatmap = sns.heatmap(
+    hr_data.corr(),
+    vmin=-1, vmax=1, annot=True,
+    cmap=sns.color_palette("vlag", as_cmap=True),
+    square=True,
+    cbar_kws={'shrink': 0.8}
+)
+
+# Set title
+heatmap.set_title('Correlation Heatmap', fontdict={'fontsize': 16}, pad=20)
+
+# Rotate both x and y-axis labels and adjust alignment
+heatmap.set_xticklabels(heatmap.get_xticklabels(), rotation=45, ha='right', fontsize=10)
+heatmap.set_yticklabels(heatmap.get_yticklabels(), rotation=45, ha='right', fontsize=10)
+
+plt.tight_layout()
+plt.show()
 
 # Data Preprocessing
 
-hr_data = pd.get_dummies(hr_data, columns=['salary'])
-X = hr_data.drop(columns = ['left', 'departments','Work_accident'])
-y = hr_data['left']
+# Dropping unnecessary columns
+# Encoding categorical variables (done for correlation of data)
 
+# Storage for further processing
+X = hr_data.drop(columns=['retention', 'department', 'work_accident'])
+y = hr_data['retention']
 
-
-# Data Visualization
-
-
-# sns.countplot(hr_data.left, palette="Set2")
-#
-# print(hr_data.columns)
-# sns.countplot(x='salary', hue='left', palette="Set2", data=hr_data)
-# plt.figure(figsize=(15, 7))
-# sns.countplot(x='departments', hue='left', palette="Set2", data=hr_data)
-
-#
-# sns.pairplot(hr_data, hue='left')
-
-
+# Standardizing the data
 sc = StandardScaler()
 X = sc.fit_transform(X)
 
+# Splitting the data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
 
 # Model Building
-
 models = {
-    '        Logistic Regression': LogisticRegression(),
-    '        Decision Tree': DecisionTreeClassifier(),
-    '        Random Forest Classifier': RandomForestClassifier(),
+    'Logistic Regression': LogisticRegression(),
+    'Decision Tree': DecisionTreeClassifier(),
+    'Random Forest Classifier': RandomForestClassifier(),
 }
 
 accuracy, precision, recall = {}, {}, {}
@@ -101,8 +172,9 @@ for i in models.keys():
 hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision'])
 hr_data_models['Accuracy'] = accuracy.values()
 hr_data_models['Precision'] = precision.values()
-hr_data_models
+print(hr_data_models)
 
+# Confusion matrix
 cm = confusion_matrix(y_test, y_pred)
 conf_mat = pd.DataFrame(data=cm, columns=['Predicted Not Left', 'Predicted Left'],
                         index=['Actual Not Left', 'Actual Left'])
@@ -114,31 +186,8 @@ FN = cm[1, 0]
 FP = cm[0, 1]
 sensitivity = TP / float(TP + FN)
 specificity = TN / float(TN + FP)
-print('The acuuracy of the model = TP+TN/(TP+TN+FP+FN) = ', (TP + TN) / float(TP + TN + FP + FN), '\n', '\n',
+print('The accuracy of the model = TP+TN/(TP+TN+FP+FN) = ', (TP + TN) / float(TP + TN + FP + FN), '\n', '\n',
       'Sensitivity or True Positive Rate = TP/(TP+FN) = ', TP / float(TP + FN), '\n',
       'Specificity or True Negative Rate = TN/(TN+FP) = ', TN / float(TN + FP), '\n', '\n',
       'Positive Predictive value = TP/(TP+FP) = ', TP / float(TP + FP), '\n',
-      'Negative predictive Value = TN/(TN+FN) = ', TN / float(TN + FN), '\n', )
-
-mlp = MLPClassifier(max_iter=500)
-mlp.fit(X_train, y_train)
-mlp_y_pred = mlp.predict(X_test)
-
-print('The accuracy score of MLP is : ', accuracy_score(mlp_y_pred, y_test))
-print('The precision score of MLP is : ', precision_score(mlp_y_pred, y_test))
-
-ann = tf.keras.models.Sequential()
-
-ann.add(tf.keras.layers.Dense(units=6, activation='relu'))
-ann.add(tf.keras.layers.Dense(units=6, activation='relu'))
-ann.add(tf.keras.layers.Dense(units=1, activation='sigmoid'))
-
-ann.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-ann.fit(X_train, y_train, batch_size=32, epochs=10)
-ann_y_pred = ann.predict(X_test)
-ann_y_pred = (ann_y_pred > 0.5)
-
-print('The accuracy score of MLP is : ', accuracy_score(y_test, ann_y_pred))
-print('The precision score of MLP is : ', precision_score(y_test, ann_y_pred))
-
-# Conclusion
+      'Negative predictive Value = TN/(TN+FN) = ', TN / float(TN + FN), '\n')
