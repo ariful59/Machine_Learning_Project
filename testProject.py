@@ -10,7 +10,10 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 import seaborn as sns
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+
+
+#import from own class
+from LogisticRegression import LogisticRegression
 
 
 warnings.filterwarnings('ignore')
