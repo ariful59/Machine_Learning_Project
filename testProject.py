@@ -3,20 +3,22 @@ import warnings
 import matplotlib.pyplot as plt
 import numpy as np
 from seaborn import heatmap
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.tree import DecisionTreeClassifier
 import seaborn as sns
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+
 
 warnings.filterwarnings('ignore')
 
 # Reading CSV
 hr_data = pd.read_csv('HR_Analytics.csv')
 print(hr_data.head())
-
+#Steps we are going to follow
 # Data Exploration
 # Handle missing values
 # Remove duplicates
@@ -55,10 +57,14 @@ for column in hr_data.columns:
         qualitative.append(column)
 
 # Handle missing values
+print("Missing Value List")
+print(hr_data.isna().sum())
+
+
+# Remove duplicates
 print("Number of Duplicate data")
 print(hr_data.duplicated().sum())
 
-# Remove duplicates
 if hr_data.duplicated().any():
     print('Duplicate data found')
     hr_data.drop_duplicates(inplace=True)
@@ -68,13 +74,13 @@ else:
 print(hr_data.duplicated().sum())
 
 # Check for outliers
-remove_binary_valued_columns = [t for t in hr_data.columns if
+columns_boxplot_to_detect_outliers = [t for t in hr_data.columns if
                                 t not in ['retention', 'promotion_last_5years', 'work_accident']]
-print(remove_binary_valued_columns)
+print(columns_boxplot_to_detect_outliers)
 
 plt.figure(figsize=(10, 6))
 plt.suptitle("Boxplot")
-for i, feature in enumerate(remove_binary_valued_columns):
+for i, feature in enumerate(columns_boxplot_to_detect_outliers):
     ax = plt.subplot(3, 3, i + 1)
     sns.boxplot(hr_data[feature], ax=ax)
     ax.set_xticks([])
@@ -90,22 +96,70 @@ for col in quantitative:
     IQR = Q3 - Q1
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
+    outliers = hr_data[(hr_data['tenure'] > upper_bound) | (hr_data['tenure'] < lower_bound)]
+    print(outliers)
 
-    # hr_data[col] = np.clip(hr_data[col], lower_bound, upper_bound)
+    # Compute the mean of the column
+    mean_value = hr_data['tenure'].mean()
+    # Set outlier values to the mean value
+    #hr_data.loc[(hr_data['tenure'] > upper_bound) | (hr_data['tenure'] < lower_bound), hr_data['tenure']] = mean_value
+
     print(hr_data.shape)
+
+print("Tenure columns details")
+print(hr_data['tenure'])
 
 # Correct data types
 hr_data['salary'] = hr_data['salary'].astype('category')
 # Fix inconsistent data
-# No inconsistent data
+    # No inconsistent data
 
 # Address class imbalance (if relevant)
-# No address class imbalance
+    # No address class imbalance
 # Feature engineering
-# No need to create new feature from existing features.
+    # No need to create new feature from existing features.
 
 # Data Visualization
-# Histograms, Box plots, Scatter plots, Bar plots, Line plots, Pair plots
+# Histograms,
+salary_vs_retention = pd.crosstab(hr_data['salary'], hr_data['retention'], margins=True)
+department_vs_tenure = pd.crosstab(hr_data['department'], hr_data['retention'], margins=True)
+
+# Create a figure and a set of subplots
+fig, axes = plt.subplots(1, 2, figsize=(20, 8))
+
+# Plot for Salary vs Retention
+ax1 = axes[0]
+salary_vs_retention.drop('All', axis=1).drop('All', axis=0).plot(kind="bar", ax=ax1)
+ax1.set_title('Salary vs Retention')
+ax1.set_xlabel('Salary')
+ax1.set_ylabel('Retention Count')
+ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45)
+
+# Plot for Department vs Tenure
+ax2 = axes[1]
+department_vs_tenure.drop('All', axis=1).drop('All', axis=0).plot(kind="bar", ax=ax2)
+ax2.set_title('Department vs Retention')
+ax2.set_xlabel('Department')
+ax2.set_ylabel('Retention Count')
+ax2.set_xticklabels(ax2.get_xticklabels(), rotation=45)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(
+    x="average_monthly_hours", y="satisfaction_level",
+    hue="retention",
+    data=hr_data,
+    palette="Set2"
+)
+plt.title("Average Monthly hours vs Satisfaction Level")
+plt.xlabel("Average Monthly hours")
+plt.ylabel("Satisfaction Level")
+plt.show()
+
+
+# Box plots, Scatter plots, Bar plots, Line plots, Pair plots
+
 
 # Encoding Data
 encoder = LabelEncoder()
@@ -140,7 +194,7 @@ plt.show()
 # Data Preprocessing
 
 # Dropping unnecessary columns
-# Encoding categorical variables (done for correlation of data)
+    # Encoding categorical variables (done for correlation of data)
 
 # Storage for further processing
 X = hr_data.drop(columns=['retention', 'department', 'work_accident'])
@@ -154,6 +208,10 @@ X = sc.fit_transform(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
 
 # Model Building
+
+#sepearte function for this
+
+
 models = {
     'Logistic Regression': LogisticRegression(),
     'Decision Tree': DecisionTreeClassifier(),
