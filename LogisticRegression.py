@@ -14,11 +14,11 @@ class LogisticRegression:
         self.bias = 0
         for i in range(self.number_of_iteration):
             linear_model = np.dot(X, self.weights) + self.bias  # y = wx + b
-            logistic_regression = 1 / (1 + np.exp(-linear_model))
+            logistic_regression = 1 / (1 + np.exp(-linear_model)) #sigmod function
             dw = (1 / n_samples) * np.dot(X.T, (logistic_regression - y)) #1/N*2x(y_predict - y)
             db = (1 / n_samples) * np.sum(logistic_regression - y)  # #1/N*2(y_predict - y)
-            self.weights -= self.learning_rate * dw #Update w
-            self.bias -= self.learning_rate * db # update b
+            self.weights -= self.learning_rate * dw #Update w= w - learning rate * dw
+            self.bias -= self.learning_rate * db # update b = b - learning rate * db
             #loop this until we reached local minimum
             if np.linalg.norm(dw) < self.tolerance and abs(db) < self.tolerance:
                 print(f"Converged after {i + 1} iterations")
