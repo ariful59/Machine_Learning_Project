@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from seaborn import heatmap
 
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import seaborn as sns
 from sklearn.tree import DecisionTreeClassifier
-from random_forest import RandomForest
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
 
@@ -207,13 +207,6 @@ X = sc.fit_transform(X)
 # Splitting the data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
 
-# Convert X and y to NumPy arrays to ensure compatibility
-X_train_np = X_train.to_numpy() if not isinstance(X_train, np.ndarray) else X_train
-y_train_np = y_train.to_numpy() if not isinstance(y_train, np.ndarray) else y_train
-
-X_test_np = X_test.to_numpy() if not isinstance(X_test, np.ndarray) else X_test
-y_test_np = y_test.to_numpy() if not isinstance(y_test, np.ndarray) else y_test
-
 # Model Building
 
 #sepearte function for this
@@ -222,28 +215,21 @@ y_test_np = y_test.to_numpy() if not isinstance(y_test, np.ndarray) else y_test
 models = {
     'Logistic Regression': LogisticRegression(),
     'Decision Tree': DecisionTreeClassifier(),
-    'Random Forest Classifier': RandomForest(n_trees=10, max_depth=10, min_samples_split=2),
+    'Random Forest Classifier': RandomForestClassifier(),
 }
 
 accuracy, precision, recall = {}, {}, {}
 
 for i in models.keys():
-    if i == 'Random Forest Classifier':
-        models[i].fit(X_train_np, y_train_np)
-        y_pred = models[i].predict(X_test_np)
-    else:
-        models[i].fit(X_train, y_train)
-        y_pred = models[i].predict(X_test)
-        
+    models[i].fit(X_train, y_train)
+    y_pred = models[i].predict(X_test)
+
     accuracy[i] = accuracy_score(y_pred, y_test)
     precision[i] = precision_score(y_pred, y_test)
-    recall[i] = recall_score(y_test, y_pred)
-    
-hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision', 'Recall'])
+
+hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision'])
 hr_data_models['Accuracy'] = accuracy.values()
 hr_data_models['Precision'] = precision.values()
-hr_data_models['Recall'] = recall.values() 
-
 print(hr_data_models)
 
 # Confusion matrix
