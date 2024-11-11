@@ -4,14 +4,13 @@ import numpy as np
 
 
 class DecisionTree:
-    def __init__(self, min_samples_split = 2, max_depth=1000, n_features = None):
+    def __init__(self, min_samples_split = 2, max_depth=100, n_features = None):
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
         self.n_features = n_features
         self.root = None
 
     def fit(self, X, y):
-        y = np.array(y)
         self.n_features = X.shape[1] if not self.n_features else min(X.shape[1], self.n_features)
         # we will make the tree by calling the make tree
         self.root = self._make_tree(X, y)
@@ -43,7 +42,7 @@ class DecisionTree:
             # calculate the value of the node
             #if there is only one label then we will just get the y value of that label and return
             # However, if there are more than one node, we will do the majority vote
-            return Node(Counter(y).most_common(1)[0][0])
+            return Node(value = Counter(y).most_common(1)[0][0])
         #find the best split position
         feature_indexes = np.random.choice(n_true_feature, self.n_features, replace=False)
         best_feature, best_threshold = self._best_split(X, y, feature_indexes)
@@ -115,10 +114,10 @@ class DecisionTree:
 #Only leaf node should value.
 class Node:
     def __init__(self, feature=None, threshold=None, left = None, right = None, *, value = None):
-        self.left = None
-        self.right = None
-        self.feature = None
-        self.threshold = None
+        self.left = left
+        self.right = right
+        self.feature = feature
+        self.threshold = threshold
         self.value = value
 
     def is_leaf(self):

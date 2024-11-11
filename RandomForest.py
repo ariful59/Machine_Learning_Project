@@ -11,6 +11,7 @@ class RandomForest:
         self.trees = []
 
     def fit(self, X, y):
+        y = np.array(y)
         self.trees = []
         for _ in range(self.n_trees):
             tree = DecisionTree(max_depth=self.max_depth,
