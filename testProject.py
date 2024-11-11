@@ -1,16 +1,16 @@
 import pandas as pd
 import warnings
 import matplotlib.pyplot as plt
-import numpy as np
-from seaborn import heatmap
 
 from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import seaborn as sns
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+
+
+#import from own class
+from LogisticRegression import LogisticRegression
+from RandomForest import RandomForest
 
 
 warnings.filterwarnings('ignore')
@@ -214,8 +214,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random
 
 models = {
     'Logistic Regression': LogisticRegression(),
-    'Decision Tree': DecisionTreeClassifier(),
-    'Random Forest Classifier': RandomForestClassifier(),
+    'Random Forest Classifier': RandomForest()
 }
 
 accuracy, precision, recall = {}, {}, {}
