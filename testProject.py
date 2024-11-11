@@ -2,7 +2,7 @@ import pandas as pd
 import warnings
 import matplotlib.pyplot as plt
 
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import seaborn as sns
@@ -225,10 +225,13 @@ for i in models.keys():
 
     accuracy[i] = accuracy_score(y_pred, y_test)
     precision[i] = precision_score(y_pred, y_test)
-
-hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision'])
+    recall[i] = recall_score(y_test, y_pred)
+    
+hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision', 'Recall'])
 hr_data_models['Accuracy'] = accuracy.values()
 hr_data_models['Precision'] = precision.values()
+hr_data_models['Recall'] = recall.values() 
+
 print(hr_data_models)
 
 # Confusion matrix
@@ -236,6 +239,7 @@ cm = confusion_matrix(y_test, y_pred)
 conf_mat = pd.DataFrame(data=cm, columns=['Predicted Not Left', 'Predicted Left'],
                         index=['Actual Not Left', 'Actual Left'])
 sns.heatmap(conf_mat, annot=True, fmt='d', cmap="YlGnBu")
+plt.show()
 
 TN = cm[0, 0]
 TP = cm[1, 1]
