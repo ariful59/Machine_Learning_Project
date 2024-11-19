@@ -2,15 +2,15 @@ import pandas as pd
 import warnings
 import matplotlib.pyplot as plt
 
-from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import seaborn as sns
 
-
 #import from own class
 from LogisticRegression import LogisticRegression
 from RandomForest import RandomForest
+from SuportVectorClassifier import SupportVectorClassifier
 
 
 warnings.filterwarnings('ignore')
@@ -208,47 +208,50 @@ X = sc.fit_transform(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
 
 # Model Building
-
 #sepearte function for this
-
 
 models = {
     'Logistic Regression': LogisticRegression(),
-    'Random Forest Classifier': RandomForest()
+    'Random Forest Classifier': RandomForest(),
+    'SupportVectorClassifier' : SupportVectorClassifier()
 }
+accuracy, precision, recall, f1 = {}, {}, {}, {}
 
-accuracy, precision, recall = {}, {}, {}
+# Confusion matrix
+def cal_confusion_matrix(y_test, y_pred, algorithm_name):
+    cm = confusion_matrix(y_test, y_pred)
+    labels = [f'Class {i}' for i in range(len(cm))]
+    conf_mat = pd.DataFrame(data=cm, columns=labels, index=labels)
+    sns.heatmap(conf_mat, annot=True, fmt='d', cmap="YlGnBu")
+    plt.title(f'Confusion Matrix {algorithm_name}')
+    plt.show()
+
+    TN, FP = cm[0]
+    FN, TP = cm[1]
+    if TN + TP + FP + FN == 0:  # Avoid division by zero
+        return
+    sensitivity = TP / float(TP + FN) if TP + FN != 0 else 0
+    specificity = TN / float(TN + FP) if TN + FP != 0 else 0
+    print('The accuracy of the model = TP+TN/(TP+TN+FP+FN) = ', (TP + TN) / float(TP + TN + FP + FN), '\n', '\n',
+          'Sensitivity or True Positive Rate = TP/(TP+FN) = ', sensitivity, '\n',
+          'Specificity or True Negative Rate = TN/(TN+FP) = ', specificity, '\n', '\n',
+          'Positive Predictive value = TP/(TP+FP) = ', TP / float(TP + FP) if TP + FP != 0 else 0, '\n',
+          'Negative predictive Value = TN/(TN+FN) = ', TN / float(TN + FN) if TN + FN != 0 else 0, '\n')
 
 for i in models.keys():
     models[i].fit(X_train, y_train)
     y_pred = models[i].predict(X_test)
 
-    accuracy[i] = accuracy_score(y_pred, y_test)
-    precision[i] = precision_score(y_pred, y_test)
-    recall[i] = recall_score(y_test, y_pred)
+    accuracy[i] = accuracy_score(y_test, y_pred)
+    precision[i] = precision_score(y_test, y_pred, average='weighted')
+    recall[i] = recall_score(y_test, y_pred, average='weighted')
+    f1[i] = f1_score(y_test, y_pred, average='weighted')
+
+    cal_confusion_matrix(y_test, y_pred, i)
     
-hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision', 'Recall'])
+hr_data_models = pd.DataFrame(index=models.keys(), columns=['Accuracy', 'Precision', 'Recall', 'F1_Score'])
 hr_data_models['Accuracy'] = accuracy.values()
 hr_data_models['Precision'] = precision.values()
-hr_data_models['Recall'] = recall.values() 
-
+hr_data_models['Recall'] = recall.values()
+hr_data_models['F1_Score'] = f1.values()
 print(hr_data_models)
-
-# Confusion matrix
-cm = confusion_matrix(y_test, y_pred)
-conf_mat = pd.DataFrame(data=cm, columns=['Predicted Not Left', 'Predicted Left'],
-                        index=['Actual Not Left', 'Actual Left'])
-sns.heatmap(conf_mat, annot=True, fmt='d', cmap="YlGnBu")
-plt.show()
-
-TN = cm[0, 0]
-TP = cm[1, 1]
-FN = cm[1, 0]
-FP = cm[0, 1]
-sensitivity = TP / float(TP + FN)
-specificity = TN / float(TN + FP)
-print('The accuracy of the model = TP+TN/(TP+TN+FP+FN) = ', (TP + TN) / float(TP + TN + FP + FN), '\n', '\n',
-      'Sensitivity or True Positive Rate = TP/(TP+FN) = ', TP / float(TP + FN), '\n',
-      'Specificity or True Negative Rate = TN/(TN+FP) = ', TN / float(TN + FP), '\n', '\n',
-      'Positive Predictive value = TP/(TP+FP) = ', TP / float(TP + FP), '\n',
-      'Negative predictive Value = TN/(TN+FN) = ', TN / float(TN + FN), '\n')
