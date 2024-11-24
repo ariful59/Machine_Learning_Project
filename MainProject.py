@@ -9,6 +9,7 @@ import seaborn as sns
 
 #import from own class
 from LogisticRegression import LogisticRegression
+from NeuralNetwork import NeuralNetwork
 from RandomForest import RandomForest
 from SuportVectorClassifier import SupportVectorClassifier
 
@@ -18,7 +19,7 @@ warnings.filterwarnings('ignore')
 # Reading CSV
 hr_data = pd.read_csv('HR_Analytics.csv')
 print(hr_data.head())
-#Steps we are going to follow
+# Steps we are going to follow
 # Data Exploration
 # Handle missing values
 # Remove duplicates
@@ -163,7 +164,6 @@ plt.show()
 
 # Encoding Data
 encoder = LabelEncoder()
-
 hr_data["department"] = encoder.fit_transform(hr_data["department"])
 hr_data["salary"] = encoder.fit_transform(hr_data["salary"])
 
@@ -207,13 +207,17 @@ X = sc.fit_transform(X)
 # Splitting the data into train and test sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
 
+print(f"print ",X_train.shape)
+print(f"print ",y_train.shape)
+
 # Model Building
 #sepearte function for this
 
 models = {
     'Logistic Regression': LogisticRegression(),
     'Random Forest Classifier': RandomForest(),
-    'SupportVectorClassifier' : SupportVectorClassifier()
+    'Support Vector Classifier' : SupportVectorClassifier(),
+    'Neural Network' : NeuralNetwork(),
 }
 accuracy, precision, recall, f1 = {}, {}, {}, {}
 
