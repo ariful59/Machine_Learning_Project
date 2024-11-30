@@ -11,6 +11,7 @@ class LogisticRegression:
     def fit(self, X, y):
         n_samples, n_features = X.shape
         self.weights = np.zeros(n_features)
+        print("logistic regression", n_samples, n_features)
         self.bias = 0
         for i in range(self.number_of_iteration):
             linear_model = np.dot(X, self.weights) + self.bias  # y = wx + b
