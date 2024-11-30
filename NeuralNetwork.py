@@ -12,7 +12,6 @@ class NeuralNetwork:
         self.b1 = None
         self.b2 = None
 
-
     def fit(self, X, y):
         self.input_size = X.shape[1]
         self.W1 = np.random.rand(self.input_size, self.hidden_size)- 0.5
@@ -40,12 +39,8 @@ class NeuralNetwork:
     def _relu_derivative(self, Z):
         return (Z > 0).astype(float)
 
-    # def _sigmoid(self, Z):
-    #     return 1/(1+np.exp(-Z))
-
-    def _softmax(self, Z):
-        exp_Z = np.exp(Z - np.max(Z, axis=1, keepdims=True))  # Stability adjustment
-        return exp_Z / np.sum(exp_Z, axis=1, keepdims=True)
+    def _sigmoid(self, Z):
+        return 1/(1+np.exp(-Z))
 
     def _forward_propagation(self, X):
         # Input to hidden layer
@@ -54,7 +49,7 @@ class NeuralNetwork:
 
         # Hidden to output layer
         Z2 = np.dot(A1, self.W2) + self.b2
-        A2 = self._softmax(Z2)
+        A2 = self._sigmoid(Z2)
         return Z1, A1, Z2, A2
 
     def _one_hot(self, Y):
@@ -66,11 +61,12 @@ class NeuralNetwork:
         m = X.shape[0]  # Number of samples
 
         y_one_hot = self._one_hot(y)
+
         dZ2 = A2 - y_one_hot
         dW2 = np.dot(A1.T, dZ2) / m
         db2 = np.sum(dZ2, axis=0, keepdims=True) / m
 
-        # Gradients for hidden layer
+        # # Gradients for hidden layer
         dA1 = np.dot(dZ2, self.W2.T)
         dZ1 = dA1 * self._relu_derivative(Z1)
         dW1 = np.dot(X.T, dZ1) / m

@@ -7,11 +7,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import seaborn as sns
 
+
 #import from own class
 from LogisticRegression import LogisticRegression
 from NeuralNetwork import NeuralNetwork
 from RandomForest import RandomForest
 from SuportVectorClassifier import SupportVectorClassifier
+
 
 
 warnings.filterwarnings('ignore')
@@ -211,14 +213,15 @@ print(f"print ",X_train.shape)
 print(f"print ",y_train.shape)
 
 # Model Building
-#sepearte function for this
 
+#sepearte function for this
 models = {
     'Logistic Regression': LogisticRegression(),
     'Random Forest Classifier': RandomForest(),
-    'Support Vector Classifier' : SupportVectorClassifier(),
-    'Neural Network' : NeuralNetwork(),
+    'Support Vector Classifier': SupportVectorClassifier(),
+    'Neural Network': NeuralNetwork(),
 }
+
 accuracy, precision, recall, f1 = {}, {}, {}, {}
 
 # Confusion matrix
