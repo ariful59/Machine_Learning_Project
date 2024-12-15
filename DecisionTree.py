@@ -1,7 +1,5 @@
 from collections import Counter
-
 import numpy as np
-
 
 class DecisionTree:
     def __init__(self, min_samples_split = 2, max_depth=100, n_features = None):
@@ -28,7 +26,6 @@ class DecisionTree:
                 return self._tree_traverse(x, node.left)
             else:
                 return self._tree_traverse(x, node.right)
-
 
     def _make_tree(self, X, y, depth = 0):
         #getting the sample size/row and feature/col from X
